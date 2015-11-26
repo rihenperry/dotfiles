@@ -1,0 +1,12 @@
+[user]
+	email = rihen234@gmail.com
+	name = rihbyne
+[push]
+	default = simple
+
+[alias]
+hist = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
+[core]
+	autocrlf = false
+	safecrlf = true
+	excludesfile = /home/rihbyne/.gitignore
