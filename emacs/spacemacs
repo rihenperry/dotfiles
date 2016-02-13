@@ -26,23 +26,27 @@ values."
      auto-completion
      ;; better-defaults
      emacs-lisp
-     ;; git
-     ;; markdown
-     ;; org
-     ;; (shell :variables
-     ;;        shell-default-height 30
-     ;;        shell-default-position 'bottom)
+     (git :variables
+          git-magit-status-fullscreen t)
+     markdown
+     org
+     (shell :variables
+             shell-default-height 30
+             shell-default-position 'bottom)
      ;; spell-checking
-     ;; syntax-checking
+     syntax-checking
      version-control
      latex
-     latex-preview-pane
      )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages then consider to create a layer, you can also put the
    ;; configuration in `dotspacemacs/config'.
-   dotspacemacs-additional-packages '()
+   dotspacemacs-additional-packages
+   '(
+     ;; Enable the toml mode
+     toml-mode
+     )
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages '()
    ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
@@ -82,11 +86,7 @@ values."
    ;; with 2 themes variants, one dark and one light)
    dotspacemacs-themes '(spacemacs-dark
                          spacemacs-light
-                         solarized-light
-                         solarized-dark
-                         leuven
-                         monokai
-                         zenburn)
+                         leuven)
    ;; If non nil the cursor color matches the state color.
    dotspacemacs-colorize-cursor-according-to-state t
    ;; Default font. `powerline-scale' allows to quickly tweak the mode-line
@@ -95,7 +95,7 @@ values."
                                :size 11
                                :weight bold
                                :width normal
-                               :powerline-scale 1.1)
+                               :powerline-scale 1.5)
    ;; The leader key
    dotspacemacs-leader-key "SPC"
    ;; The leader key accessible in `emacs state' and `insert state'
@@ -203,11 +203,13 @@ values."
    layers configuration. You are free to put any user code."
  (global-linum-mode) ; Show line numbers by default
  (setq TeX-engine 'xetex) ; tex engine used to compile latex document
+ (setq-default TeX-PDF-mode t) ; enable pdf output by default
  (eval-after-load "tex"
    '(add-to-list 'TeX-command-list
                  '("XeLaTeX" "xelatex -interaction=nonstopmode %s"
                    TeX-run-command t t :help "Run xelatex") t))
  (setq latex-run-command "xelatex")
+ (setq powerline-default-separator 'slant)
 )
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -217,8 +219,12 @@ values."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(TeX-engine (quote xetex))
- '(pdf-latex-command "xelatex"))
+ '(TeX-engine (quote xetex) t)
+ '(custom-safe-themes
+   (quote
+    ("6ecd762f08fd5c3aab65585d5aa04f6ae8b44d969df4be669259975dac849687" "0ec59d997a305e938d9ec8f63263a8fc12e17990aafc36ff3aff9bc5c5a202f0" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" default)))
+ '(pdf-latex-command "xelatex")
+ '(spacemacs-theme-comment-bg nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
