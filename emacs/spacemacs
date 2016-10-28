@@ -26,23 +26,32 @@ values."
      auto-completion
      ;; better-defaults
      emacs-lisp
-     ;; git
-     ;; markdown
+     git
+     markdown
      ;; org
-     ;; (shell :variables
-     ;;        shell-default-height 30
-     ;;        shell-default-position 'bottom)
+     (shell :variables
+             shell-default-height 30
+             shell-default-position 'bottom)
      ;; spell-checking
-     ;; syntax-checking
+     syntax-checking
      version-control
      latex
-     latex-preview-pane
      )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages then consider to create a layer, you can also put the
    ;; configuration in `dotspacemacs/config'.
-   dotspacemacs-additional-packages '()
+   dotspacemacs-additional-packages '(
+      web-mode             ;; handles mixed js and jsx files
+      js2-mode             ;; js editing mode which recognizes ES6+ features
+      json-mode            ;; upgraded json mode
+      exec-path-from-shell ;; updates emacs exec path from shell
+      js-comint            ;; nodejs repl
+      gotham-theme         ;; colorscheme for emacs
+      bongo                ;; emacs internal music app
+      auctex               ;; latex engine for emacs
+      latex-preview-pane   ;; pdf preview mode for emacs-latex files
+     )
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages '()
    ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
@@ -63,7 +72,7 @@ values."
    ;; variable is `emacs' then the `holy-mode' is enabled at startup. `hybrid'
    ;; uses emacs key bindings for vim's insert mode, but otherwise leaves evil
    ;; unchanged. (default 'vim)
-   dotspacemacs-editing-style 'emacs
+   dotspacemacs-editing-style 'vim
    ;; If non nil output loading progress in `*Messages*' buffer. (default nil)
    dotspacemacs-verbose-loading nil
    ;; Specify the startup banner. Default value is `official', it displays
@@ -80,22 +89,25 @@ values."
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press <SPC> T n to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
-   dotspacemacs-themes '(spacemacs-dark
+   dotspacemacs-themes '(dracula
                          spacemacs-light
-                         solarized-light
-                         solarized-dark
+                         spacemacs-dark
+                         dark-mint
+                         ample
+                         flatui
                          leuven
+                         dark-mint
+                         green-phosphor
+                         underwater
                          monokai
                          zenburn)
    ;; If non nil the cursor color matches the state color.
    dotspacemacs-colorize-cursor-according-to-state t
    ;; Default font. `powerline-scale' allows to quickly tweak the mode-line
    ;; size to make separators look not too crappy.
-   dotspacemacs-default-font '("consolas"
-                               :size 11
-                               :weight bold
-                               :width normal
-                               :powerline-scale 1.1)
+   dotspacemacs-default-font '("Roboto Mono Medium"
+                               :size 10
+                               :powerline-scale 1.2)
    ;; The leader key
    dotspacemacs-leader-key "SPC"
    ;; The leader key accessible in `emacs state' and `insert state'
@@ -143,7 +155,6 @@ values."
    ;; (default 'bottom)
    dotspacemacs-which-key-position 'bottom
    ;; If non nil a progress bar is displayed when spacemacs is loading. This
-   ;; may increase the boot time on some systems and emacs builds, set it to
    ;; nil to boost the loading time. (default t)
    dotspacemacs-loading-progress-bar t
    ;; If non nil the frame is fullscreen when Emacs starts up. (default nil)
@@ -201,13 +212,108 @@ values."
   "Configuation function for user code.
    This function is called at the very end of Spacemacs initialization after
    layers configuration. You are free to put any user code."
- (global-linum-mode) ; Show line numbers by default
- (setq TeX-engine 'xetex) ; tex engine used to compile latex document
- (eval-after-load "tex"
-   '(add-to-list 'TeX-command-list
-                 '("XeLaTeX" "xelatex -interaction=nonstopmode %s"
-                   TeX-run-command t t :help "Run xelatex") t))
- (setq latex-run-command "xelatex")
+  (global-linum-mode) ; Show line numbers by default
+
+  ;; multi terminal configuration in emacs
+  (setq multi-term-program "/bin/zsh")
+
+  (add-hook 'term-mode-hook
+            (lambda ()
+              (setq term-buffer-maximum-size 10000)))
+  (add-hook 'term-mode-hook
+            (lambda ()
+              (setq show-trailing-whitespace nil)))
+  (add-hook 'term-mode-hook
+            (lambda ()
+              (add-to-list 'term-bind-key-alist '("M-[" . multi-term-prev))
+              (add-to-list 'term-bind-key-alist '("M-]" . multi-term-next))))
+  (add-hook 'term-mode-hook
+            (lambda ()
+              (define-key term-raw-map (kbd "C-y") 'term-paste)))
+  ;; end of multi-terminal configuration
+
+  (setq TeX-engine 'xetex) ; tex engine used to compile latex document
+  (eval-after-load "tex"
+    '(add-to-list 'TeX-command-list
+                  '("XeLaTeX" "xelatex -interaction=nonstopmode %s"
+                    TeX-run-command t t :help "Run xelatex") t))
+  (setq latex-run-command "xelatex")
+
+  (setq powerline-default-separator 'slant)
+
+  ;; set eslint path
+  (setenv "PATH" (concat (getenv "PATH") "/usr/bin/eslint"))
+  (setq exec-path (append exec-path '("/usr/bin/eslint")))
+
+  ;; use web-mode for .jsx files
+  (add-to-list 'auto-mode-alist '("\\.jsx$" . web-mode))
+  ;; use web-mode for .js files
+  (add-to-list 'auto-mode-alist '("\\.js$" . web-mode))
+
+  ;; use web-mode for .js files
+  (add-to-list 'auto-mode-alist '("\\.erb$" . web-mode))
+
+  (require 'web-mode)
+  ;; http://www.flycheck.org/manual/latest/index.html
+  (require 'flycheck)
+
+  ;; enable nvm in emacs
+  (js-do-use-nvm)
+
+  ;; use python3
+  (require 'python)
+  (defun python-shell-parse-command ()
+    "Return the string used to execute the inferior Python process."
+    "/usr/bin/python3 -i"
+    )
+
+  ;; turn on flychecking globally
+  (add-hook 'after-init-hook #'global-flycheck-mode)
+
+  ;; disable jshint since we prefer eslint checking
+  (setq-default flycheck-disabled-checkers
+                (append flycheck-disabled-checkers
+                        '(javascript-jshint)))
+
+  ;; use eslint with web-mode for jsx files
+  (flycheck-add-mode 'javascript-eslint 'web-mode)
+
+  ;; customize flycheck temp file prefix
+  (setq-default flycheck-temp-prefix ".flycheck")
+
+  ;; disable json-jsonlist checking for json files
+  (setq-default flycheck-disabled-checkers
+                (append flycheck-disabled-checkers
+                        '(json-jsonlist)))
+
+  ;; set bongo audio-engine
+  (setq-default bongo-enabled-backends '(mplayer))
+
+  ;; https://github.com/purcell/exec-path-from-shell
+  ;; only need exec-path-from-shell on OSX
+  ;; this hopefully sets up path and other vars better
+  (exec-path-from-shell-initialize)
+
+
+  ;; adjust indents for web-mode to 2 spaces
+  (defun my-web-mode-hook ()
+    "Hooks for Web mode. Adjust indents"
+  ;;; http://web-mode.org/
+    (setq web-mode-markup-indent-offset 2)
+    (setq web-mode-css-indent-offset 2)
+    (setq web-mode-js-indent-offset 4)
+    (setq web-mode-code-indent-offset 2))
+  (add-hook 'web-mode-hook  'my-web-mode-hook)
+
+
+  ;; for better jsx syntax-highlighting in web-mode
+  ;; - courtesy of Patrick @halbtuerke
+  (defadvice web-mode-highlight-part (around tweak-jsx activate)
+    (if (equal web-mode-content-type "jsx")
+        (let ((web-mode-enable-part-face nil))
+          ad-do-it)
+      ad-do-it))
+
 )
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -218,6 +324,11 @@ values."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(TeX-engine (quote xetex))
+ '(custom-safe-themes
+   (quote
+    ("12b4427ae6e0eef8b870b450e59e75122d5080016a9061c9696959e50d578057" "ad950f1b1bf65682e390f3547d479fd35d8c66cafa2b8aa28179d78122faa947" "e02187fd6fefb7041f0219a14a4ce3fc4a2db9f893fd1868d06b6d1480738581" "12b7ed9b0e990f6d41827c343467d2a6c464094cbcc6d0844df32837b50655f9" "b571f92c9bfaf4a28cb64ae4b4cdbda95241cd62cf07d942be44dc8f46c491f4" "590759adc4a5bf7a183df81654cce13b96089e026af67d92b5eec658fb3fe22f" "8db4b03b9ae654d4a57804286eb3e332725c84d7cdab38463cb6b97d5762ad26" "19ba41b6dc0b5dd34e1b8628ad7ae47deb19f968fe8c31853d64ea8c4df252b8" "c158c2a9f1c5fcf27598d313eec9f9dceadf131ccd10abc6448004b14984767c" "1b1e54d9e0b607010937d697556cd5ea66ec9c01e555bb7acea776471da59055" "70b9c3d480948a3d007978b29e31d6ab9d7e259105d558c41f8b9532c13219aa" "4ce035b661aee2ea47dbb2f368b8e573346054c04d61c45363e4cb12bc2bdffa" "19bbce335e60f48b87e9bf0e46dee0c5ac0a2c91a20185f4a13e0605dd5dbefa" "3ac266781ee0ac3aa74a6913a1506924cad669f111564507249f0ffa7c5e4b53" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" default)))
+ '(latex-preview-pane-multifile-mode (quote auctex))
+ '(menu-bar-mode t)
  '(pdf-latex-command "xelatex"))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
