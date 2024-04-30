@@ -95,4 +95,4 @@ export PATH="$PATH:~/.emacs.d/bin:/Applications/MacPorts/Emacs.app/Contents/MacO
 export TEST=True
 
 ulimit -n 10240
-alias dotconfig='/usr/bin/git --git-dir=/Users/rpereira/.cfg --work-tree=/Users/rpereira'
+alias dotfiles='/usr/bin/git --git-dir=/Users/rpereira/.cfg --work-tree=/Users/rpereira'
