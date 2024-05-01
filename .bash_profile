@@ -81,18 +81,16 @@ function login-vault() {
     export VAULT_TOKEN=$(vault login -token-only -method=ldap)
 }
 
-#alias login-aws="(cd ~/codefarm/assume-role && python3 ./aws_assume_role.py -u rpereira --duration 28800)"
 alias login-aws-orion="(cd ~/codefarm/assume-role && python3 ./aws_assume_role.py -u $spirent_ad_username --profile spirent-orion --duration 28800)"
 
-# export VAULT_CACERT="/Users/ltran/code/cip-devops/packer/common/all/certificates/cip-devops-rootCA.crt"
-
-#alias login-vault="echo 'Logging into Vault via Active Directory...' ; export VAULT_TOKEN=\$(vault login -token-only -method=ldap)"
-
 # --- spirent ldap login ends ---
+export PATH="$PATH:/opt/homebrew/bin"
+export PATH="$PATH:~/.emacs.d/bin:/Applications/Emacs.app/Contents/MacOS"
+export PATH="$PATH:~/.config/emacs/bin"
+export TEST=True
+
 export -f login-aws
 export -f login-vault
-export PATH="$PATH:~/.emacs.d/bin:/Applications/MacPorts/Emacs.app/Contents/MacOS"
-export TEST=True
 
 ulimit -n 10240
 alias dotfiles='/usr/bin/git --git-dir=/Users/rpereira/.cfg --work-tree=/Users/rpereira'
